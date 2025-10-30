@@ -1,0 +1,90 @@
+### OS ###
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+# Linux/other
+*~
+*.swp
+*.swo
+
+### IDE ###
+# Rider / IntelliJ
+**.idea/
+
+# .idea/**/workspace.xml
+# .idea/**/tasks.xml
+# .idea/**/shelf/
+
+# VS / VS Code
+.vs/
+.vscode/
+
+# ReSharper/Rider user settings
+*.DotSettings.user
+_ReSharper*/
+*.[Rr]e[Ss]harper
+resharper-*.log
+
+### .NET / MSBuild ###
+# стандартные артефакты сборки
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+[Bb]ld/
+[Oo]ut/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# публикация
+**/publish/
+**/dist/
+**/out/
+
+# тесты/покрытие/бенчмарки
+TestResults/
+*.coverage
+*.coveragexml
+.coverage/
+.coverlet/
+BenchmarkDotNet.Artifacts/
+
+# NuGet
+# (для старых проектов с packages.config)
+packages/
+# кэш nuget в проекте
+*.nuget.props
+*.nuget.targets
+# локальные источники пакетов (если используешь)
+.nupkgs/
+
+# логи/кэши/временные файлы
+*.log
+*.tlog
+*.tmp
+*.tmp_proj
+
+# пользовательские/локальные файлы решений
+*.suo
+*.user
+*.userosscache
+*.rsuser
+*.sln.docstates
+*.userprefs
+
+# БД/инструменты
+*.dbmdl
+
+### Avalonia ###
+
+.env
+*.local.json
+.tools/

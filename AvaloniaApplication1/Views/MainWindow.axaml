@@ -1,0 +1,111 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:AvaloniaApplication1.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Class="AvaloniaApplication1.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    d:DesignWidth="1200" d:DesignHeight="800"
+    Title="Fractal Lab">
+
+  <Grid ColumnDefinitions="360,*" RowDefinitions="Auto,*" Margin="12">
+
+    <!-- Левая панель параметров (убрали ввод ширины/высоты в пикселях) -->
+    <Border Grid.Column="0" Grid.RowSpan="2" Padding="12" CornerRadius="8">
+      <ScrollViewer>
+        <StackPanel Spacing="14">
+          <TextBlock Text="ПАРАМЕТРЫ" FontSize="24" FontWeight="Bold" />
+
+          <!-- Координатная область -->
+          <StackPanel Spacing="8">
+            <TextBlock Text="Координатная область (Xmin, Xmax, Ymin, Ymax)" FontWeight="SemiBold"/>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="8">
+              <StackPanel>
+                <TextBlock Text="Xmin" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Xmin, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Xmax" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Xmax, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+              </StackPanel>
+
+              <StackPanel Grid.Row="1">
+                <TextBlock Text="Ymin" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Ymin, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+              </StackPanel>
+              <StackPanel Grid.Row="1" Grid.Column="1">
+                <TextBlock Text="Ymax" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Ymax, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+              </StackPanel>
+            </Grid>
+            <TextBlock Text="(Чтобы приблизить — выделите прямоугольник мышью на изображении)" FontSize="12" Foreground="Gray"/>
+          </StackPanel>
+
+          <!-- Итерации -->
+          <StackPanel Spacing="6">
+            <TextBlock Text="Количество итераций" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding Iterations, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+          </StackPanel>
+
+          <!-- Тип фрактала -->
+          <StackPanel Spacing="6">
+            <TextBlock Text="Тип фрактала" FontWeight="SemiBold"/>
+            <ComboBox ItemsSource="{Binding FractalTypes}"
+                      SelectedItem="{Binding SelectedFractalType, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch"/>
+          </StackPanel>
+
+          <!-- Окраска -->
+          <StackPanel Spacing="6">
+            <TextBlock Text="Окраска" FontWeight="SemiBold"/>
+            <ComboBox ItemsSource="{Binding ColorMapTypes}"
+                      SelectedItem="{Binding SelectedColorMap, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch"/>
+          </StackPanel>
+
+          <!-- Кнопки -->
+          <StackPanel Spacing="8" Orientation="Horizontal">
+            <Button Content="Построить"
+                    Command="{Binding RenderCommand}"
+                    Padding="16,8"/>
+            <Button Content="Сброс области"
+                    Command="{Binding ResetBoxCommand}"
+                    Padding="16,8"/>
+          </StackPanel>
+
+          <TextBlock Text="{Binding Status}" Foreground="Gray"/>
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+
+    <!-- Правая панель: холст + прямоугольник выделения -->
+    <Border Grid.Column="1" Grid.RowSpan="2"
+            Background="#111" Padding="0" CornerRadius="8">
+      <Grid x:Name="PreviewHost"
+            SizeChanged="PreviewHost_OnSizeChanged">
+        <Canvas x:Name="CanvasLayer"
+                PointerPressed="CanvasLayer_OnPointerPressed"
+                PointerMoved="CanvasLayer_OnPointerMoved"
+                PointerReleased="CanvasLayer_OnPointerReleased"
+                Cursor="Cross">
+          <Image x:Name="FractalImage"
+                 Source="{Binding RenderedBitmap}"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"/>
+          <Rectangle x:Name="SelectionRect"
+                     IsHitTestVisible="False"
+                     IsVisible="False"
+                     Stroke="Orange"
+                     StrokeThickness="2">
+            <Rectangle.Fill>
+              <SolidColorBrush Color="White" Opacity="0.2"/>
+            </Rectangle.Fill>
+          </Rectangle>
+        </Canvas>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>
