@@ -91,12 +91,16 @@ public partial class MainWindow : Window
         double yMin = (double)vm.Ymin;
         double yMax = (double)vm.Ymax;
 
-        double x0 = xMin + (rect.Left  / Math.Max(1, _vpW - 1)) * (xMax - xMin);
-        double x1 = xMin + (rect.Right / Math.Max(1, _vpW - 1)) * (xMax - xMin);
-        double y0 = yMin + (rect.Top   / Math.Max(1, _vpH - 1)) * (yMax - yMin);
-        double y1 = yMin + (rect.Bottom/ Math.Max(1, _vpH - 1)) * (yMax - yMin);
+        double worldW = xMax - xMin;
+        double worldH = yMax - yMin;
 
-        // Нормализуем
+        double x0 = xMin + (rect.Left  / Math.Max(1.0, _vpW)) * worldW;
+        double x1 = xMin + (rect.Right / Math.Max(1.0, _vpW)) * worldW;
+
+        // Y — инвертируем
+        double y0 = yMax - (rect.Top    / Math.Max(1.0, _vpH)) * worldH;
+        double y1 = yMax - (rect.Bottom / Math.Max(1.0, _vpH)) * worldH;
+        
         var nxmin = Math.Min(x0, x1);
         var nxmax = Math.Max(x0, x1);
         var nymin = Math.Min(y0, y1);

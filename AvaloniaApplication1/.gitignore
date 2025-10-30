@@ -14,7 +14,7 @@ $RECYCLE.BIN/
 
 ### IDE ###
 # Rider / IntelliJ
-**.idea/
+**/.idea/
 
 # .idea/**/workspace.xml
 # .idea/**/tasks.xml

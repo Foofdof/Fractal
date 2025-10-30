@@ -26,7 +26,7 @@
                 <TextBlock Text="Xmin" Margin="0,0,0,4"/>
                 <TextBox Text="{Binding Xmin, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
               </StackPanel>
-              <StackPanel>
+              <StackPanel  Grid.Column="1">
                 <TextBlock Text="Xmax" Margin="0,0,0,4"/>
                 <TextBox Text="{Binding Xmax, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
               </StackPanel>
