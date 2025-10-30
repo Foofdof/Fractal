@@ -1,34 +1,24 @@
-using System;
-using System.Collections.Generic;
-using Fractal.Abstractions;
-using Fractal.ValueObjects;
+using Fractal.Entities.Base;
 
 namespace Fractal.Entities.ColoredImages;
 
-public class Fire: IColoredImage
+public class Fire : ColoredImageBase
 {
-    public Image Create(FractalData value)
+    protected override double Gamma => 0.85;
+
+    protected override Pixel FromT(double t)
     {
-        var counts = value.Counts;
-        var colored = new List<List<Pixel>>(counts.Count);
+        // градиент: чёрный -> тёмно-красный -> оранжевый -> белый
+        var c0 = (0.0,   0.0,   0.0);
+        var c1 = (139.0, 0.0,   0.0);
+        var c2 = (255.0, 165.0, 0.0);
+        var c3 = (255.0, 255.0, 255.0);
 
-        for (int i = 0; i < counts.Count; i++)
-        {
-            var row = new List<Pixel>(counts[i].Count);
-            for (int j = 0; j < counts[i].Count; j++)
-            {
-                double t = (value.MaxIteration > 1) ? (double)counts[i][j] / (value.MaxIteration - 1) : 1.0;
-                t = Math.Pow(t, 0.6);
-                
-                byte r = (byte)Math.Round(255 * Math.Min(1.0, t * 3.0));
-                byte g = (byte)Math.Round(Math.Min(1.0, Math.Max(0.0, (t - 0.33) * 3.0)));
-                byte b = (byte)Math.Round(Math.Max(0.0, (t - 0.66) * 3.0 * 0.5));
+        (double r, double g, double b) col =
+            t < 0.33 ? Lerp(c0, c1, t / 0.33) :
+            t < 0.66 ? Lerp(c1, c2, (t - 0.33) / 0.33) :
+            Lerp(c2, c3, (t - 0.66) / 0.34);
 
-                row.Add(new Pixel(r, g, b));
-            }
-            colored.Add(row);
-        }
-        
-        return new Image(colored);
+        return ToPixel(col);
     }
 }

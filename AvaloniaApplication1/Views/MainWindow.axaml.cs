@@ -33,7 +33,7 @@ public partial class MainWindow : Window
 
     private void UpdateViewportFromHost()
     {
-        if (PreviewHost == null || CanvasLayer == null || FractalImage == null) return;
+        if (PreviewHost == null || CanvasLayer == null) return;
 
         _vpW = Math.Max(1, (int)PreviewHost.Bounds.Width);
         _vpH = Math.Max(1, (int)PreviewHost.Bounds.Height);
@@ -41,12 +41,9 @@ public partial class MainWindow : Window
         CanvasLayer.Width = _vpW;
         CanvasLayer.Height = _vpH;
 
-        FractalImage.Width = _vpW;
-        FractalImage.Height = _vpH;
-
         if (DataContext is MainWindowViewModel vm)
         {
-            vm.RenderViewport(_vpW, _vpH);
+            vm.RenderViewport(_vpW, _vpH); // Пересчёт с текущими координатами
         }
     }
 
@@ -64,8 +61,43 @@ public partial class MainWindow : Window
     {
         if (_dragStart.HasValue && e.GetCurrentPoint(CanvasLayer).Properties.IsLeftButtonPressed)
         {
-            var p = e.GetPosition(CanvasLayer);
-            _selection = new Rect(_dragStart.Value, p).Normalize();
+            var start = _dragStart.Value;
+            var cur = e.GetPosition(CanvasLayer);
+
+            // целевое соотношение сторон (ширина/высота) под холст
+            double target = _vpW / (double)_vpH;
+
+            double dx = cur.X - start.X;
+            double dy = cur.Y - start.Y;
+
+            if (Math.Abs(dy) < 1e-6)
+            {
+                dy = Math.Sign(dy == 0 ? 1 : dy) * Math.Abs(dx) / target;
+            }
+            else
+            {
+                double current = Math.Abs(dx / dy);
+                if (current > target)
+                {
+                    // слишком широкий — подгоняем высоту
+                    dy = Math.Sign(dy) * Math.Abs(dx) / target;
+                }
+                else
+                {
+                    // слишком высокий — подгоняем ширину
+                    dx = Math.Sign(dx) * Math.Abs(dy) * target;
+                }
+            }
+
+            var end = new Point(start.X + dx, start.Y + dy);
+
+            // ограничим в пределах холста
+            end = new Point(
+                Math.Clamp(end.X, 0, _vpW),
+                Math.Clamp(end.Y, 0, _vpH)
+            );
+
+            _selection = new Rect(start, end).Normalize();
             UpdateSelectionRect();
         }
     }
@@ -80,12 +112,9 @@ public partial class MainWindow : Window
         var rect = _selection;
         _dragStart = null;
 
-        // Минимальный размер выделения
         if (rect.Width < 4 || rect.Height < 4) return;
-
         if (DataContext is not MainWindowViewModel vm) return;
-
-        // Пересчёт px -> координаты комплексной плоскости
+        
         double xMin = (double)vm.Xmin;
         double xMax = (double)vm.Xmax;
         double yMin = (double)vm.Ymin;
@@ -94,22 +123,20 @@ public partial class MainWindow : Window
         double worldW = xMax - xMin;
         double worldH = yMax - yMin;
 
-        double x0 = xMin + (rect.Left  / Math.Max(1.0, _vpW)) * worldW;
-        double x1 = xMin + (rect.Right / Math.Max(1.0, _vpW)) * worldW;
-
-        // Y — инвертируем
-        double y0 = yMax - (rect.Top    / Math.Max(1.0, _vpH)) * worldH;
-        double y1 = yMax - (rect.Bottom / Math.Max(1.0, _vpH)) * worldH;
+        double denomX = Math.Max(1.0, _vpW - 1.0);
+        double denomY = Math.Max(1.0, _vpH - 1.0);
         
-        var nxmin = Math.Min(x0, x1);
-        var nxmax = Math.Max(x0, x1);
-        var nymin = Math.Min(y0, y1);
-        var nymax = Math.Max(y0, y1);
+        double x0 = xMin + (rect.Left  / denomX) * worldW;
+        double x1 = xMin + (rect.Right / denomX) * worldW;
 
-        vm.Xmin = (decimal)nxmin;
-        vm.Xmax = (decimal)nxmax;
-        vm.Ymin = (decimal)nymin;
-        vm.Ymax = (decimal)nymax;
+        // Y на канве сверху-вниз
+        double y0 = yMax - (rect.Top    / denomY) * worldH;
+        double y1 = yMax - (rect.Bottom / denomY) * worldH;
+        
+        vm.Xmin = (decimal)Math.Min(x0, x1);
+        vm.Xmax = (decimal)Math.Max(x0, x1);
+        vm.Ymin = (decimal)Math.Min(y0, y1);
+        vm.Ymax = (decimal)Math.Max(y0, y1);
 
         vm.RenderViewport(_vpW, _vpH);
     }

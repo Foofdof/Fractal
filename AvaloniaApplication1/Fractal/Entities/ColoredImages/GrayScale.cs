@@ -1,33 +1,16 @@
-using System;
-using System.Collections.Generic;
-using Fractal.Abstractions;
-using Fractal.ValueObjects;
+using Fractal.Entities.Base;
+using Fractal.Entities.ColoredImages;
 
 namespace Fractal.Entities.ColoredImages;
 
-public class GrayScale: IColoredImage
+public class GrayScale : ColoredImageBase
 {
-    public Image Create(FractalData value)
+    // немного усилим тёмные детали
+    protected override double Gamma => 0.8;
+
+    protected override Pixel FromT(double t)
     {
-        var counts = value.Counts;
-        var colored = new List<List<Pixel>>(counts.Count);
-
-        for (int i = 0; i < counts.Count; i++)
-        {
-            var row = new List<Pixel>(counts[i].Count);
-            for (int j = 0; j < counts[i].Count; j++)
-            {
-                double t = (value.MaxIteration > 1) ? (double)counts[i][j] / (value.MaxIteration - 1) : 1.0;
-                
-                byte r = (byte)Math.Clamp((int)Math.Round(255.0 * t), 0, 255);
-                byte g = r;
-                byte b = r;
-
-                row.Add(new Pixel(r, g, b));
-            }
-            colored.Add(row);
-        }
-        
-        return new Image(colored);
+        byte v = (byte)System.Math.Round(255 * t);
+        return new Pixel(v, v, v);
     }
 }
