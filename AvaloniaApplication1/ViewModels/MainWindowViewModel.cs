@@ -98,8 +98,7 @@ public partial class MainWindowViewModel : ViewModelBase
             RenderedBitmap = null;
         }
     }
-
-    // ----- Безопасная конвертация Image -> WriteableBitmap (без unsafe)
+    
     private static WriteableBitmap ToBitmap(Fractal.Entities.Image image)
     {
         if (image.Pixels == null || image.Pixels.Count == 0)

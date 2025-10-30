@@ -2,5 +2,6 @@
 
 public enum FractalType
 {
-    Mandelbrot
+    Mandelbrot,
+    BurningShip
 }
