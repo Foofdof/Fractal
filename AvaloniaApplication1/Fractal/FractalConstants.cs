@@ -17,7 +17,7 @@ public static class FractalConstants
         };
 
         public static readonly ImageBox DefaultMandelbrotImageBox = new ImageBox(FullHD, DefaultGeneratingBox);
-        public static double DefaultThreshold = 2.0;
+        public static decimal DefaultThreshold = 2;
     }
 
     public static (int Nx, int Ny) FullHD = (1920, 1080);

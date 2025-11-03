@@ -15,6 +15,10 @@ public class FractalFactory
                 return new FractalMandelbrot();
             case FractalType.BurningShip:
                 return new FractalBurningShip();
+            case FractalType.Multibrot3:
+                return new FractalMultibrot3();
+            case FractalType.Newton3:
+                return new FractalNewton3();
             default:
                 throw new ArgumentOutOfRangeException(nameof(fractalType), $"Неизвестный тип фрактала: {fractalType}");
         }

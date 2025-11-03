@@ -3,5 +3,7 @@
 public enum FractalType
 {
     Mandelbrot,
-    BurningShip
+    BurningShip,
+    Multibrot3,
+    Newton3
 }

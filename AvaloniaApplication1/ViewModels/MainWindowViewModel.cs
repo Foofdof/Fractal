@@ -98,11 +98,11 @@ public partial class MainWindowViewModel : ViewModelBase
             RenderedBitmap = null;
         }
     }
-    
+
     private static WriteableBitmap ToBitmap(Fractal.Entities.Image image)
     {
-        if (image.Pixels == null || image.Pixels.Count == 0)
-            throw new ArgumentException("Image пуст.");
+        if (image?.Pixels == null || image.Pixels.Count == 0)
+            throw new ArgumentException("Image is empty.");
 
         int h = image.Pixels.Count;
         int w = image.Pixels[0].Count;
@@ -114,26 +114,31 @@ public partial class MainWindowViewModel : ViewModelBase
             AlphaFormat.Opaque);
 
         using var fb = bmp.Lock();
-
         int stride = fb.RowBytes;
-        var buffer = new byte[stride * h];
+
+        // Копируем только видимые байты строки (w * 4), padding заполняет сам framebuffer
+        var line = new byte[w * 4];
 
         for (int y = 0; y < h; y++)
         {
-            var row = image.Pixels[y];
+            var src = image.Pixels[y];
+            int off = 0;
+
             for (int x = 0; x < w; x++)
             {
-                var p = row[x];                    // Pixel: R,G,B
-                int offset = y * stride + x * 4;   // BGRA
-
-                buffer[offset + 0] = p.B;
-                buffer[offset + 1] = p.G;
-                buffer[offset + 2] = p.R;
-                buffer[offset + 3] = 255;
+                var p = src[x]; // Pixel с полями R,G,B (byte)
+                line[off + 0] = p.B;     // B
+                line[off + 1] = p.G;     // G
+                line[off + 2] = p.R;     // R
+                line[off + 3] = 255;     // A (opaque)
+                off += 4;
             }
+
+            // адрес начала строки в framebuffer
+            var dst = IntPtr.Add(fb.Address, y * stride);
+            Marshal.Copy(line, 0, dst, line.Length);
         }
 
-        Marshal.Copy(buffer, 0, fb.Address, buffer.Length);
         return bmp;
     }
 }
