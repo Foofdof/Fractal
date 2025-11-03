@@ -115,28 +115,28 @@ public partial class MainWindow : Window
         if (rect.Width < 4 || rect.Height < 4) return;
         if (DataContext is not MainWindowViewModel vm) return;
         
-        double xMin = (double)vm.Xmin;
-        double xMax = (double)vm.Xmax;
-        double yMin = (double)vm.Ymin;
-        double yMax = (double)vm.Ymax;
+        decimal xMin = vm.Xmin;
+        decimal xMax = vm.Xmax;
+        decimal yMin = vm.Ymin;
+        decimal yMax = vm.Ymax;
 
-        double worldW = xMax - xMin;
-        double worldH = yMax - yMin;
+        decimal worldW = xMax - xMin;
+        decimal worldH = yMax - yMin;
 
-        double denomX = Math.Max(1.0, _vpW - 1.0);
-        double denomY = Math.Max(1.0, _vpH - 1.0);
+        decimal denomX = (decimal)Math.Max(1.0, _vpW - 1.0);
+        decimal denomY = (decimal)Math.Max(1.0, _vpH - 1.0);
         
-        double x0 = xMin + (rect.Left  / denomX) * worldW;
-        double x1 = xMin + (rect.Right / denomX) * worldW;
+        decimal x0 = xMin + ((decimal)rect.Left  / denomX) * worldW;
+        decimal x1 = xMin + ((decimal)rect.Right / denomX) * worldW;
 
         // Y на канве сверху-вниз
-        double y0 = yMax - (rect.Top    / denomY) * worldH;
-        double y1 = yMax - (rect.Bottom / denomY) * worldH;
+        decimal y0 = yMax - ((decimal)rect.Top    / denomY) * worldH;
+        decimal y1 = yMax - ((decimal)rect.Bottom / denomY) * worldH;
         
-        vm.Xmin = (decimal)Math.Min(x0, x1);
-        vm.Xmax = (decimal)Math.Max(x0, x1);
-        vm.Ymin = (decimal)Math.Min(y0, y1);
-        vm.Ymax = (decimal)Math.Max(y0, y1);
+        vm.Xmin = Math.Min(x0, x1);
+        vm.Xmax = Math.Max(x0, x1);
+        vm.Ymin = Math.Min(y0, y1);
+        vm.Ymax = Math.Max(y0, y1);
 
         vm.RenderViewport(_vpW, _vpH);
     }
