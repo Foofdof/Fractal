@@ -1,55 +1,51 @@
-﻿using Fractal.Abstractions;
-using Fractal.Constants;
-using Fractal.ValueObjects;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
+using Fractal.Abstractions;
+using Fractal.Constants;
+using Fractal.Numerics;
+using Fractal.ValueObjects;
 
 namespace Fractal.Entities.Base;
 
-/// <summary>
-/// Базовый класс фрактала, по умолчанию фрактал Мандельброта, 
-/// в случае необходимости все нужные методы переопределяются в наследниках
-/// </summary>
 public abstract class BaseFractal : IFractal
 {
     protected double Threshold { get; set; } = FractalConstants.MandelbrotConstants.DefaultThreshold;
     protected ImageBox DefaultGeneratingBox { get; set; } = FractalConstants.MandelbrotConstants.DefaultMandelbrotImageBox;
-    protected virtual Func<Complex, Complex, Complex> Z() =>
-        (z0, c) => z0 * z0 + c;
+    
+    protected virtual DecimalComplex Iterate(in DecimalComplex z, in DecimalComplex c)
+        => z.Square() + c;
 
-    public virtual FractalData Generate(ImageBox? box, int? maxIterations) 
+    public virtual FractalData Generate(ImageBox? box, int? maxIterations)
     {
-        var maxIter = maxIterations ?? FractalConstants.MaxIteration;
+        int maxIter = maxIterations ?? FractalConstants.MaxIteration;
         var imageBox = box ?? DefaultGeneratingBox;
-        Box2D computingBox = imageBox.Box;
-        var z0 = new Complex(0,0);
-        var z = z0;
+        var cb = imageBox.Box;
 
-        int xSize = imageBox.Screen.Nx;
-        var xStep = (computingBox.Xmax - computingBox.Xmin) / (xSize - 1);
+        int w = imageBox.Screen.Nx;
+        int h = imageBox.Screen.Ny;
 
-        int ySize = imageBox.Screen.Ny;
-        var yStep = (computingBox.Ymax - computingBox.Ymin) / (ySize - 1);
+        decimal xStep = (cb.Xmax - cb.Xmin) / Math.Max(1, w - 1);
+        decimal yStep = (cb.Ymax - cb.Ymin) / Math.Max(1, h - 1);
+        double r2 = Threshold * Threshold;
 
-        var counts = new List<List<int>>(ySize);
-        
-        for (int yIndex = 0; yIndex < ySize; yIndex++)
+        var counts = new List<List<int>>(h);
+
+        for (int py = 0; py < h; py++)
         {
-            var y = computingBox.Ymax - yIndex * yStep;
-            var row = new List<int>(xSize);
+            // ориентация: верх экрана соответствует Ymax
+            decimal cy = cb.Ymax - py * yStep;
+            var row = new List<int>(w);
 
-            for (int xIndex = 0; xIndex < xSize; xIndex++)
+            for (int px = 0; px < w; px++)
             {
-                var x = computingBox.Xmin + xIndex * xStep;
-                var c = new Complex((double)x, (double)y);
+                decimal cx = cb.Xmin + px * xStep;
+                var c = new DecimalComplex(cx, cy);
+                var z = DecimalComplex.Zero;
 
-                z = z0;
                 int iter = 0;
-
-                while (iter < maxIter && z.Magnitude <= FractalConstants.MandelbrotConstants.DefaultThreshold)
+                while (iter < maxIter && z.MagnitudeSquared <= (decimal)r2)
                 {
-                    z = Z().Invoke(z, c);
+                    z = Iterate(z, c);
                     iter++;
                 }
 
@@ -59,10 +55,6 @@ public abstract class BaseFractal : IFractal
             counts.Add(row);
         }
 
-        return new FractalData()
-        {
-            MaxIteration = maxIter,
-            Counts = counts,
-        };
+        return new FractalData { MaxIteration = maxIter, Counts = counts };
     }
 }
